@@ -4,9 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.vaadin.addon.recaptcha</groupId>
   <artifactId>recaptcha-addon</artifactId>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <name>Vaadin Widget</name>
+  <name>Vaadin reCaptcha field add-on</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -51,7 +51,7 @@
               -->
 
               <!-- Comma-separated list of widgetsets in the package -->
-              <Vaadin-Widgetsets>org.vaadin.addon.recaptcha.gwt.MyWidgetSet</Vaadin-Widgetsets>
+              <Vaadin-Widgetsets>org.vaadin.addon.recaptcha.gwt.RecaptchaWidgetset</Vaadin-Widgetsets>
             </manifestEntries>
           </archive>
         </configuration>

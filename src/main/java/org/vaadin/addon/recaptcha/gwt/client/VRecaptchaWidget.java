@@ -2,6 +2,8 @@ package org.vaadin.addon.recaptcha.gwt.client;
 
 import com.claudiushauptmann.gwt.recaptcha.client.CustomTranslation;
 import com.claudiushauptmann.gwt.recaptcha.client.RecaptchaWidget;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.UIDL;
@@ -17,12 +19,17 @@ public class VRecaptchaWidget extends RecaptchaWidget implements Paintable {
 	/** Reference to the server connection object. */
 	ApplicationConnection client;
 
+	private String lastResponse = "";
+	private String lastChallenge = "";
+
 	public VRecaptchaWidget() {
 		super("6LeeYtASAAAAAH-oArDa8zkFQLwUzE4UtLDxDkxZ");
 
 	        // This method call of the Paintable interface sets the component
 	        // style name in DOM tree
 	        setStyleName(CLASSNAME);
+
+	        create();
 	}
 
 //	public VRecaptchaWidget(String key, String lang, String theme) {
@@ -72,9 +79,6 @@ public class VRecaptchaWidget extends RecaptchaWidget implements Paintable {
 	        // Save the client side identifier (paintable id) for the widget
 	        paintableId = uidl.getId();
 
-	        // TODO replace dummy code with actual component logic
-//	        getElement().setInnerHTML("It works!");
-
 	        if (uidl.hasAttribute("reload")) {
 	        	if (uidl.getBooleanVariable("reload"))
 	        		reload();
@@ -94,35 +98,46 @@ public class VRecaptchaWidget extends RecaptchaWidget implements Paintable {
 	        	switchType(uidl.getStringAttribute("switchType"));
 	        }
 
-	}
-
-	@Override
-	public String getChallenge() {
-		String challenge = super.getChallenge();
-
-	        // Updating the state to the server can not be done before
-	        // the server connection is known, i.e., before updateFromUIDL()
-	        // has been called.
-	        if (paintableId == null || client == null) {
-	            return challenge;
+	        String r = getResponse();
+	        if (r != null && !lastResponse.equals(r)) {
+	        	client.updateVariable(paintableId, "response", r, false);
+	        	lastResponse = r;
 	        }
 
-	        // Communicate the user interaction parameters to server. This call will
-	        // initiate an AJAX request to the server.
-	        client.updateVariable(paintableId, "challenge", challenge, true);
-
-		return challenge;
+	        String ch = getChallenge();
+	        if (ch != null && !lastChallenge.equals(ch)) {
+	        	client.updateVariable(paintableId, "challenge", ch, false);
+	        	lastChallenge = ch;
+	        }
 	}
 
-	@Override
-	public String getResponse() {
-		String response = super.getResponse();
-
-	        if (paintableId == null || client == null) return response;
-
-	        client.updateVariable(paintableId, "response", response, true);
-
-		return response;
-	}
+//	@Override
+//	public String getChallenge() {
+//		String challenge = super.getChallenge();
+//
+//	        // Updating the state to the server can not be done before
+//	        // the server connection is known, i.e., before updateFromUIDL()
+//	        // has been called.
+//	        if (paintableId == null || client == null) {
+//	            return challenge;
+//	        }
+//
+//	        // Communicate the user interaction parameters to server. This call will
+//	        // initiate an AJAX request to the server.
+//	        client.updateVariable(paintableId, "challenge", challenge, true);
+//
+//		return challenge;
+//	}
+//
+//	@Override
+//	public String getResponse() {
+//		String response = super.getResponse();
+//
+//	        if (paintableId == null || client == null) return response;
+//
+//	        client.updateVariable(paintableId, "response", response, true);
+//
+//		return response;
+//	}
 
 }

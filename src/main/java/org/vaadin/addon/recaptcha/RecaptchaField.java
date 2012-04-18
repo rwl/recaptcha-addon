@@ -8,7 +8,9 @@ import net.tanesha.recaptcha.ReCaptcha;
 import net.tanesha.recaptcha.ReCaptchaFactory;
 
 import org.vaadin.addon.recaptcha.gwt.client.VRecaptchaComponent;
+import org.vaadin.addon.recaptcha.gwt.client.VRecaptchaWidget;
 
+import com.claudiushauptmann.gwt.recaptcha.client.Recaptcha;
 import com.vaadin.Application;
 import com.vaadin.data.Property;
 import com.vaadin.data.Validator.InvalidValueException;
@@ -18,7 +20,7 @@ import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.TextField;
 
-@ClientWidget(VRecaptchaComponent.class)
+@ClientWidget(VRecaptchaWidget.class)
 public class RecaptchaField extends TextField {
 
 	private static final ThreadLocal<HttpServletRequest> REQUEST = new ThreadLocal<HttpServletRequest>();
@@ -31,46 +33,42 @@ public class RecaptchaField extends TextField {
 	private String response;
 	private String privateKey = "6LeeYtASAAAAAH537ZY4VIgrLxJJqOiwjg5ZYTNi";
 	private String publicKey = "6LeeYtASAAAAAH-oArDa8zkFQLwUzE4UtLDxDkxZ";
+	private String type = Recaptcha.IMAGE;
+	private boolean reload = false;
+	private boolean focusResponseField = false;
+	private boolean showHelp = false;
+
+	private boolean listening = false;
 
 	public RecaptchaField() {
 		super();
-		listenForRequests();
+		initField();
 	}
 
 	public RecaptchaField(Property dataSource) {
 		super(dataSource);
-		listenForRequests();
+		initField();
 	}
 
 	public RecaptchaField(String caption, Property dataSource) {
 		super(caption, dataSource);
-		listenForRequests();
+		initField();
 	}
 
 	public RecaptchaField(String caption, String value) {
 		super(caption, value);
-		listenForRequests();
+		initField();
 	}
 
 	public RecaptchaField(String caption) {
 		super(caption);
-		listenForRequests();
+		initField();
 	}
 
-	private void listenForRequests() {
-		getApplication().getContext().addTransactionListener(new ApplicationContext.TransactionListener() {
-
-			public void transactionStart(Application application,
-					Object transactionData) {
-				HttpServletRequest request = (HttpServletRequest) transactionData;
-				RecaptchaField.REQUEST.set(request);
-			}
-
-			public void transactionEnd(Application application,
-					Object transactionData) {
-				RecaptchaField.REQUEST.remove();
-			}
-		});
+	private void initField() {
+	      setWidth("318px");
+	      setHeight("130px");
+	      setImmediate(true);
 	}
 
 	/** Paint (serialize) the component for the client. */
@@ -78,10 +76,40 @@ public class RecaptchaField extends TextField {
 	public void paintContent(PaintTarget target) throws PaintException {
 		super.paintContent(target);
 
+		if (!listening) {
+			getApplication().getContext().addTransactionListener(new ApplicationContext.TransactionListener() {
+
+				public void transactionStart(Application application,
+						Object transactionData) {
+					HttpServletRequest request = (HttpServletRequest) transactionData;
+					RecaptchaField.REQUEST.set(request);
+				}
+
+				public void transactionEnd(Application application,
+						Object transactionData) {
+					RecaptchaField.REQUEST.remove();
+				}
+			});
+			listening = true;
+		}
+
 		// Superclass writes any common attributes in the paint target.
 		super.paintContent(target);
 
-//		target.addVariable(this, "reload", isReload());
+		if (reload) {
+			target.addVariable(this, "reload", true);
+			reload = false;
+		}
+
+		if (focusResponseField) {
+			target.addVariable(this, "focusResponseField", true);
+			focusResponseField = false;
+		}
+
+		if (showHelp) {
+			target.addVariable(this, "showHelp", true);
+			showHelp = false;
+		}
 	}
 
 	/** Deserialize changes received from client. */
@@ -103,7 +131,8 @@ public class RecaptchaField extends TextField {
 	public void validate() throws InvalidValueException {
 		super.validate();
 
-		if (challenge == null || response == null) return;
+		if (challenge == null || response == null)
+			throw new InvalidValueException("null challenge/response");
 
 		ReCaptcha r = ReCaptchaFactory.newReCaptcha(publicKey, privateKey, true);
 
@@ -134,4 +163,25 @@ public class RecaptchaField extends TextField {
 		this.publicKey = publicKey;
 	}
 
+	public void switchType(String type) {
+		this.type = type;
+		requestRepaint();
+	}
+
+	public void reload() {
+		reload = true;
+		requestRepaint();
+	}
+
+	public void focusResponseField() {
+		focusResponseField = true;
+		requestRepaint();
+	}
+
+	public void showHelp() {
+		showHelp = true;
+		requestRepaint();
+	}
+
 }
+

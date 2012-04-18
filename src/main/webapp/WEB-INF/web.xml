@@ -17,11 +17,16 @@
         <init-param>
             <description>Application widgetset</description>
             <param-name>widgetset</param-name>
-            <param-value>org.vaadin.addon.recaptcha.gwt.RecaptchaWidgetSet</param-value>
+            <param-value>org.vaadin.addon.recaptcha.gwt.RecaptchaWidgetset</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>Vaadin Application Servlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <!-- <servlet-mapping>
+        <servlet-name>Vaadin Application Servlet</servlet-name>
+        <url-pattern>/VAADIN/*</url-pattern>
+    </servlet-mapping>  -->
 </web-app>
